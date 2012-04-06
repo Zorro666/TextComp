@@ -1,0 +1,13 @@
+*.swp
+Localization.7z
+dialog_ai_recording_list.xml
+dialog_mp_recording_list.xml
+dialog_recording_list.xml
+text_game_controls.xml
+text_mp_messages.xml
+text_platformspecific.xml
+text_ui_credit_list.xml
+text_ui_database.xml
+text_ui_messages.xml
+text_ui_mp_messages.xml
+text_ui_objectives.xml
