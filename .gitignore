@@ -11,3 +11,5 @@ text_ui_database.xml
 text_ui_messages.xml
 text_ui_mp_messages.xml
 text_ui_objectives.xml
+*.d
+*.o
