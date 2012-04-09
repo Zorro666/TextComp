@@ -106,6 +106,19 @@ def parseXML(xmlSource):
 				
 	return dialogFile
 
+def saveDialogFile(dialogFile, filename, writeTags=True, writeValues=True):
+	f = open(filename, "wb")
+	for item in dialogFile:
+		tag = unicode(item['tag'])
+		value = unicode(item['value'])
+		if writeTags == True:
+			f.write(tag)
+			f.write('\0')
+		if writeValues == True:
+			f.write(value)
+			f.write('\0')
+	f.close()
+
 def loadDialogFile(filename):
 	if os.path.exists(filename) == False:
 		print("File:'%s' not found", filename)
@@ -121,19 +134,27 @@ if __name__ == '__main__':
 	action = 'parse'
 
 	if action == 'parse':
-		filename = "dialog_ai_recording_list"
-		filename = "dialog_mp_recording_list"
-		filename = "dialog_recording_list"
-		filename = "text_game_controls"
-		filename = "text_mp_messages"
-		filename = "text_platformspecific"
-		filename = "text_ui_credit_list"
-		filename = "text_ui_database"
-		filename = "text_ui_messages"
-		filename = "text_ui_mp_messages"
-		filename = "text_ui_objectives"
+		inputFileName = "dialog_ai_recording_list"
+		inputFileName = "dialog_mp_recording_list"
+		inputFileName = "dialog_recording_list"
+		inputFileName = "text_game_controls"
+		inputFileName = "text_mp_messages"
+		inputFileName = "text_platformspecific"
+		inputFileName = "text_ui_credit_list"
+		inputFileName = "text_ui_database"
+		inputFileName = "text_ui_messages"
+		inputFileName = "text_ui_mp_messages"
+		inputFileName = "text_ui_objectives"
 
-		filename += ".xml"
-		dialogFile = loadDialogFile(filename)
+		inputFileName = "text_mp_messages"
+
+		inputFileName += ".xml"
+		dialogFile = loadDialogFile(inputFileName)
 		debugPrintDialogFile(dialogFile)
+
+		outputFileName = "jake.dia"
+		saveDialogFile(dialogFile, outputFileName, True, True)
+
+		print "Input File:", inputFileName, os.path.getsize(inputFileName), "bytes"
+		print "Output File:", outputFileName, os.path.getsize(outputFileName), "bytes"
 
