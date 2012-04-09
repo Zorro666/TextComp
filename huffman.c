@@ -26,9 +26,9 @@ typedef struct SymbolCode
 
 /* Internal private static functions */
 
-static void makeCounts(const char* const pSource, const int numBytes, unsigned long* const pCounts)
+static void makeCounts(const char* const pSource, const size_t numBytes, unsigned long* const pCounts)
 {
-	int i;
+	size_t i;
 	for (i = 0; i < numBytes; i++)
 	{
 		const int symbol = pSource[i];
@@ -230,9 +230,9 @@ static void printModel(const TreeNode* const pNodes, const SymbolCode* const pCo
 	}
 }
 
-static void compressData(const char* const pInput, const int numBytes, BitFile* const pOutput, const SymbolCode* const pCodes)
+static void compressData(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const SymbolCode* const pCodes)
 {
-	int i;
+	size_t i;
 	for (i = 0; i < numBytes; i++)
 	{
 		const int symbol = pInput[i];
@@ -250,7 +250,7 @@ static void uncompressData(BitFile* const pInput, void* const pOutput, int* cons
 #endif /* #if 0 */
 
 /* Public API functions */
-void compressInput(const char* const pInput, const int numBytes, BitFile* const pOutput, const int debugOutputModel)
+void compressInput(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const int debugOutputModel)
 {
 	unsigned long* pCounts = NULL;
 	TreeNode* pNodes = NULL;

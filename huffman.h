@@ -3,6 +3,6 @@
 
 #include "binaryUtil.h"
 
-void compressInput(const char* const pInput, const int numBytes, BitFile* const pOutput, const int debugOutputModel);
+void compressInput(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const int debugOutputModel);
 
 #endif /* #ifndef HUFFMAN_HH */
