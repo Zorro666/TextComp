@@ -18,7 +18,7 @@ C_LINK_FLAGS +=
 C_TARGET_EXTENSION := 
 endif	# ifdef WINDIR
 
-HUFFMAN_C_DEPENDS:= binaryUtil.c
+HUFFMAN_C_DEPENDS:= binaryUtil.c main.c
 HUFFMAN_CPP_DEPENDS:=
 C_PROJECTS:=huffman
 
