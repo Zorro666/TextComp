@@ -6,9 +6,15 @@
 typedef struct BitFile
 {
 	FILE* pFile;
-	int currentByte;
-	int currentBitPos;
+	int currentBits;
+	unsigned int mode;
+	unsigned char currentMask;
 } BitFile;
+
+BitFile* binaryOpenInputFile(const char* const name);
+BitFile* binaryOpenOutputFile(const char* const name);
+
+void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int count);
 
 void binaryFilePrint(FILE* pFile, unsigned int code, unsigned int bits);
 
