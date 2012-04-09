@@ -5,20 +5,16 @@ import xml.etree.ElementTree
 
 def debugPrintDialogFile(dialogFile):
 	# Debug print info about the details
-	for element in dialogFile:
-		f = element[0]
-		details = element[1]
-		sizes=[]
-		deltas=[]
-		buildNumbers=[]
-		for d in details:
-			buildNumber = d['buildNumber']
-			fileSize = d['fileSize']
-			deltaSize = d['deltaSize']
-			sizes.append(fileSize)
-			deltas.append(deltaSize)
-			buildNumbers.append(buildNumber)
-			print f, "Build:", buildNumber, "Size:", fileSize, "Delta:", deltaSize
+	tagSize = 0
+	valueSize = 0
+	for item in dialogFile:
+		tag = unicode(item['tag'])
+		value = unicode(item['value'])
+		print str("Tag:'")+tag+str("' Value:'")+value+str("'")
+		tagSize += len(tag)
+		valueSize += len(value)
+	print "Num Items", len(dialogFile), "TagSize", tagSize, "ValueSize", valueSize
+	print "CRC Tag Size",4*len(dialogFile),"Saving", tagSize-4*len(dialogFile)
 
 def parseXML(xmlSource):
 	excelXML = xml.etree.ElementTree.XML(xmlSource)
@@ -76,6 +72,7 @@ def parseXML(xmlSource):
 
 				row = e
 				numRow = 0
+				foundIt = 0
 				item = dict()
 				for r in row:
 					tag = str(r.tag)
@@ -98,11 +95,14 @@ def parseXML(xmlSource):
 
 						if numRow == 0:
 							item['tag'] = c.text
+							foundIt += 1
 						if numRow == 2:
 							item['value'] = c.text
+							foundIt += 1
 						numRow += 1
-				if numRow == 3:
-					print item
+
+				if foundIt == 2:
+					dialogFile.append(item)
 				
 	return dialogFile
 
@@ -121,7 +121,19 @@ if __name__ == '__main__':
 	action = 'parse'
 
 	if action == 'parse':
-		filename = "text_mp_messages" + ".xml"
+		filename = "dialog_ai_recording_list"
+		filename = "dialog_mp_recording_list"
+		filename = "dialog_recording_list"
+		filename = "text_game_controls"
+		filename = "text_mp_messages"
+		filename = "text_platformspecific"
+		filename = "text_ui_credit_list"
+		filename = "text_ui_database"
+		filename = "text_ui_messages"
+		filename = "text_ui_mp_messages"
+		filename = "text_ui_objectives"
+
+		filename += ".xml"
 		dialogFile = loadDialogFile(filename)
 		debugPrintDialogFile(dialogFile)
 
