@@ -24,50 +24,9 @@ typedef struct SymbolCode
 #define MAX_NUM_NODES (MAX_NUM_CODES*2)
 #define	MAX_NODE (MAX_NUM_NODES-1)
 
-static void makeCounts(const char* const pSource, const int numBytes, unsigned long* const pCounts);
-static void scaleCounts(unsigned long* const pCounts, TreeNode* const pNodes);
-static int buildTree(TreeNode* const pNodes);
-static void convertTreeToCode(const TreeNode* const pNodes, SymbolCode* const pCodes, 
-											 				const unsigned int code, const unsigned int bits, const int node);
-static void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes);
-static void inputCounts(BitFile* const pOutput, TreeNode* const pNodes);
-static void printModel(const TreeNode* const pNodes, const SymbolCode* const pCodes);
-static void compressData(const char* const pInput, const int numBytes, BitFile* const pOutput, const SymbolCode* pCodes);
-static void uncompressData(BitFile* const pInput, void* const pOutput, int* const pNumBytes, 
-													 const TreeNode* const pNodes, const int rootNode);
-static void printChar(const int c);
+/* Internal private static functions */
 
-void compressInput(const char* const pInput, const int numBytes, BitFile* const pOutput)
-{
-	unsigned long* pCounts = NULL;
-	TreeNode* pNodes = NULL;
-	SymbolCode* pCodes = NULL;
-	int rootNode = -1;
-	int debugOutputModel = 0;
-
-	pCounts = (unsigned long*)malloc(MAX_NUM_SYMBOLS*sizeof(unsigned long));
-	memset(pCounts, 0, sizeof(unsigned long)*MAX_NUM_SYMBOLS);
-	pNodes = (TreeNode*)malloc(MAX_NUM_NODES*sizeof(TreeNode));
-	memset(pNodes, 0, sizeof(TreeNode)*MAX_NUM_NODES);
-	pCodes = (SymbolCode*)malloc(MAX_NUM_CODES*sizeof(SymbolCode));
-	memset(pCodes, 0, sizeof(SymbolCode)*MAX_NUM_CODES);
-	
-	makeCounts(pInput, numBytes, pCounts);
-	scaleCounts(pCounts, pNodes);
-	outputCounts(pOutput, pNodes);
-	rootNode = buildTree(pNodes);
-	convertTreeToCode(pNodes, pCodes, 0, 0, rootNode);
-	if (debugOutputModel)
-	{
-		printModel(pNodes, pCodes);
-	}
-	compressData(pInput, numBytes, pOutput, pCodes);
-	free(pCounts);
-	free(pNodes);
-	free(pCounts);
-}
-
-void makeCounts(const char* const pSource, const int numBytes, unsigned long* const pCounts)
+static void makeCounts(const char* const pSource, const int numBytes, unsigned long* const pCounts)
 {
 	int i;
 	for (i = 0; i < numBytes; i++)
@@ -77,7 +36,7 @@ void makeCounts(const char* const pSource, const int numBytes, unsigned long* co
 	}
 }
 
-void scaleCounts(unsigned long* const pCounts, TreeNode* const pNodes)
+static void scaleCounts(unsigned long* const pCounts, TreeNode* const pNodes)
 {
 	unsigned long maxCount = 0;
 	int i;
@@ -112,7 +71,7 @@ void scaleCounts(unsigned long* const pCounts, TreeNode* const pNodes)
 
 /* Format is: startSymbol, stopSymbol, count0, count1, count2, ... countN, ..., 0 */
 /* When finding the start, stop symbols only break out if find more than 3 0's in the counts */
-void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
+static void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
 {
 	int first = 0;
 	int last;
@@ -166,7 +125,7 @@ void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
 	putc(0, pOutput->pFile);
 }
 
-int buildTree(TreeNode* const pNodes)
+static int buildTree(TreeNode* const pNodes)
 {
 	int min1;
 	int min2;
@@ -216,8 +175,8 @@ int buildTree(TreeNode* const pNodes)
 	return nextFree;
 }
 
-void convertTreeToCode(const TreeNode* const pNodes, SymbolCode* const pCodes, 
-											 const unsigned int code, const unsigned int bits, const int node)
+static void convertTreeToCode(const TreeNode* const pNodes, SymbolCode* const pCodes, 
+											 				const unsigned int code, const unsigned int bits, const int node)
 {
 	unsigned int nextCode;
 	unsigned int nextBits;
@@ -234,7 +193,7 @@ void convertTreeToCode(const TreeNode* const pNodes, SymbolCode* const pCodes,
 	convertTreeToCode(pNodes, pCodes, nextCode, nextBits, pNodes[node].child1);
 }
 
-void printChar(const int c)
+static void printChar(const int c)
 {
 	if (c >= ' ' && c < 127)
 	{
@@ -246,7 +205,7 @@ void printChar(const int c)
 	}
 }
 
-void printModel(const TreeNode* const pNodes, const SymbolCode* const pCodes)
+static void printModel(const TreeNode* const pNodes, const SymbolCode* const pCodes)
 {
 	int i;
 	for (i = 0; i < MAX_NODE; i++)
@@ -271,7 +230,52 @@ void printModel(const TreeNode* const pNodes, const SymbolCode* const pCodes)
 	}
 }
 
-void compressData(const char* const pInput, const int numBytes, BitFile* const pOutput, const SymbolCode* pCodes);
+static void compressData(const char* const pInput, const int numBytes, BitFile* const pOutput, const SymbolCode* const pCodes)
+{
+	int i;
+	for (i = 0; i < numBytes; i++)
+	{
+		const int symbol = pInput[i];
+		const unsigned code = pCodes[symbol].code;
+		const unsigned bits = pCodes[symbol].bits;
+		binaryOutputBits(pOutput, code, bits);
+	}
+	binaryOutputBits(pOutput, pCodes[END_OF_STREAM].code, pCodes[END_OF_STREAM].bits);
+}
 
-void inputCounts(BitFile* const pOutput, TreeNode* const pNodes);
-void uncompressData(BitFile* const pInput, void* const pOutput, int* const pNumBytes, const TreeNode* const pNodes, const int rootNode);
+#if 0
+static void inputCounts(BitFile* const pOutput, TreeNode* const pNodes);
+static void uncompressData(BitFile* const pInput, void* const pOutput, int* const pNumBytes, const TreeNode* const pNodes, const int rootNode);
+
+#endif /* #if 0 */
+
+/* Public API functions */
+void compressInput(const char* const pInput, const int numBytes, BitFile* const pOutput, const int debugOutputModel)
+{
+	unsigned long* pCounts = NULL;
+	TreeNode* pNodes = NULL;
+	SymbolCode* pCodes = NULL;
+	int rootNode = -1;
+
+	pCounts = (unsigned long*)malloc(MAX_NUM_SYMBOLS*sizeof(unsigned long));
+	memset(pCounts, 0, sizeof(unsigned long)*MAX_NUM_SYMBOLS);
+	pNodes = (TreeNode*)malloc(MAX_NUM_NODES*sizeof(TreeNode));
+	memset(pNodes, 0, sizeof(TreeNode)*MAX_NUM_NODES);
+	pCodes = (SymbolCode*)malloc(MAX_NUM_CODES*sizeof(SymbolCode));
+	memset(pCodes, 0, sizeof(SymbolCode)*MAX_NUM_CODES);
+	
+	makeCounts(pInput, numBytes, pCounts);
+	scaleCounts(pCounts, pNodes);
+	outputCounts(pOutput, pNodes);
+	rootNode = buildTree(pNodes);
+	convertTreeToCode(pNodes, pCodes, 0, 0, rootNode);
+	if (debugOutputModel)
+	{
+		printModel(pNodes, pCodes);
+	}
+	compressData(pInput, numBytes, pOutput, pCodes);
+	free(pCounts);
+	free(pNodes);
+	free(pCounts);
+}
+
