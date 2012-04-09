@@ -1,4 +1,6 @@
 *.swp
+*.exe
+huffman
 Localization.7z
 dialog_ai_recording_list.xml
 dialog_mp_recording_list.xml
