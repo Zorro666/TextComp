@@ -87,9 +87,9 @@ void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int c
 	}
 }
 
-void binaryOutputBit(BitFile* const pOutput, const int bit)
+#if 0
+void binaryInputBits(BitFile* const pOutput, unsigned long code, unsigned int count)
 {
-	binaryOutputBits(pOutput, (unsigned long)bit, 1);
 }
-
+#endif
 
