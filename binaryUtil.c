@@ -7,6 +7,19 @@
 #define BINARY_MODE_INPUT (1)
 #define BINARY_MODE_OUTPUT (2)
 
+/* Internal static functions */
+static BitFile* binaryOpenFile(const char* const name, const char* const mode)
+{
+	BitFile* const pBitFile = (BitFile*const)malloc(sizeof(BitFile));
+	memset(pBitFile, 0, sizeof(BitFile));
+	pBitFile->pFile = fopen(name, mode);
+	pBitFile->currentBits = 0x0;
+	pBitFile->currentMask = 0x80;
+	pBitFile->mode = BINARY_MODE_UNKNOWN;
+	return pBitFile;
+}
+
+/* Public API functions */
 void binaryFilePrint(FILE* pFile, unsigned int code, unsigned int bits)
 {
 	unsigned int mask = 0x0;
@@ -23,17 +36,6 @@ void binaryFilePrint(FILE* pFile, unsigned int code, unsigned int bits)
 		}
 		mask = mask>>1;
 	}
-}
-
-static BitFile* binaryOpenFile(const char* const name, const char* const mode)
-{
-	BitFile* const pBitFile = (BitFile*const)malloc(sizeof(BitFile));
-	memset(pBitFile, 0, sizeof(BitFile));
-	pBitFile->pFile = fopen(name, mode);
-	pBitFile->currentBits = 0x0;
-	pBitFile->currentMask = 0x80;
-	pBitFile->mode = BINARY_MODE_UNKNOWN;
-	return pBitFile;
 }
 
 BitFile* binaryOpenInputFile(const char* const name)

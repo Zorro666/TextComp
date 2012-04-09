@@ -13,6 +13,7 @@ typedef struct BitFile
 
 BitFile* binaryOpenInputFile(const char* const name);
 BitFile* binaryOpenOutputFile(const char* const name);
+void binaryCloseFile(BitFile* const pBitFile);
 
 void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int count);
 

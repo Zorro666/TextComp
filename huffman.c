@@ -277,6 +277,6 @@ void compressInput(const char* const pInput, const int numBytes, BitFile* const 
 	compressData(pInput, numBytes, pOutput, pCodes);
 	free(pCounts);
 	free(pNodes);
-	free(pCounts);
+	free(pCodes);
 }
 
