@@ -99,7 +99,7 @@ static void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
 			last--;
 			for (next = last+1; next < MAX_NUM_SYMBOLS; next++)
 			{
-				if (pNodes[last].count != 0)
+				if (pNodes[next].count != 0)
 				{
 					break;
 				}
@@ -266,6 +266,7 @@ void compressInput(const char* const pInput, const int numBytes, BitFile* const 
 	
 	makeCounts(pInput, numBytes, pCounts);
 	scaleCounts(pCounts, pNodes);
+	printf("outputCounts\n");
 	outputCounts(pOutput, pNodes);
 	rootNode = buildTree(pNodes);
 	convertTreeToCode(pNodes, pCodes, 0, 0, rootNode);
