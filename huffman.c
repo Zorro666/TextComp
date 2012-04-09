@@ -71,7 +71,7 @@ static void scaleCounts(unsigned long* const pCounts, TreeNode* const pNodes)
 
 /* Format is: startSymbol, stopSymbol, count0, count1, count2, ... countN, ..., 0 */
 /* When finding the start, stop symbols only break out if find more than 3 0's in the counts */
-static void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
+static void outputCounts(FILE* const pFile, const TreeNode* const pNodes)
 {
 	int first = 0;
 	int last;
@@ -114,15 +114,37 @@ static void outputCounts(BitFile* const pOutput, const TreeNode* const pNodes)
 			}
 			last = next;
 		}
-		putc(first, pOutput->pFile);
-		putc(last, pOutput->pFile);
+		putc(first, pFile);
+		putc(last, pFile);
 		for (i = first; i <= last; i++)
 		{
 			const unsigned int count = pNodes[i].count;
-			putc((int)count, pOutput->pFile);
+			putc((int)count, pFile);
 		}
 	}
-	putc(0, pOutput->pFile);
+	putc(0xFF, pFile);
+	putc(0xFF, pFile);
+	putc((int)(pNodes[0xFF].count), pFile);
+}
+
+static void inputCounts(FILE* const pFile, TreeNode* const pNodes)
+{
+	while (1)
+	{
+		int i;
+		const int first = getc(pFile);
+		const int last = getc(pFile);
+		for (i = first; i <= last; i++)
+		{
+			const int count = getc(pFile);
+			pNodes[i].count = (size_t)count;
+		}
+		if ((first == last) && (first == 0xFF))
+		{
+			break;
+		}
+	}
+	pNodes[END_OF_STREAM].count = 1;
 }
 
 static int buildTree(TreeNode* const pNodes)
@@ -167,6 +189,7 @@ static int buildTree(TreeNode* const pNodes)
 
 		pNodes[nextFree].child0 = min1;
 		pNodes[nextFree].child1 = min2;
+		pNodes[nextFree].savedCount = 0;
 	}
 
 	nextFree--;
@@ -201,7 +224,7 @@ static void printChar(const int c)
 	}
 	else
 	{
-		printf("0x%02X", c);
+		printf("0x%03X", c);
 	}
 }
 
@@ -243,14 +266,8 @@ static void compressData(const char* const pInput, const size_t numBytes, BitFil
 	binaryOutputBits(pOutput, pCodes[END_OF_STREAM].code, pCodes[END_OF_STREAM].bits);
 }
 
-#if 0
-static void inputCounts(BitFile* const pOutput, TreeNode* const pNodes);
-static void uncompressData(BitFile* const pInput, void* const pOutput, int* const pNumBytes, const TreeNode* const pNodes, const int rootNode);
-
-#endif /* #if 0 */
-
 /* Public API functions */
-void compressInput(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const int debugOutputModel)
+void compressInput(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const unsigned int debugFlag)
 {
 	unsigned long* pCounts = NULL;
 	TreeNode* pNodes = NULL;
@@ -266,17 +283,48 @@ void compressInput(const char* const pInput, const size_t numBytes, BitFile* con
 	
 	makeCounts(pInput, numBytes, pCounts);
 	scaleCounts(pCounts, pNodes);
-	printf("outputCounts\n");
-	outputCounts(pOutput, pNodes);
+	outputCounts(pOutput->pFile, pNodes);
 	rootNode = buildTree(pNodes);
 	convertTreeToCode(pNodes, pCodes, 0, 0, rootNode);
-	if (debugOutputModel)
+	if (debugFlag > 0)
 	{
+		printf("RootNode 0x%03X\n", rootNode);
 		printModel(pNodes, pCodes);
 	}
+
 	compressData(pInput, numBytes, pOutput, pCodes);
+
 	free(pCounts);
 	free(pNodes);
 	free(pCodes);
 }
 
+size_t uncompressInput(BitFile* const pInput, const size_t inputSize, char* const pOutput, const unsigned int debugFlag)
+{
+	TreeNode* pNodes = NULL;
+	SymbolCode* pCodes = NULL;
+	int rootNode = -1;
+
+	pNodes = (TreeNode*)malloc(MAX_NUM_NODES*sizeof(TreeNode));
+	memset(pNodes, 0, sizeof(TreeNode)*MAX_NUM_NODES);
+	pCodes = (SymbolCode*)malloc(MAX_NUM_CODES*sizeof(SymbolCode));
+	memset(pCodes, 0, sizeof(SymbolCode)*MAX_NUM_CODES);
+
+	inputCounts(pInput->pFile, pNodes);
+	rootNode = buildTree(pNodes);
+	convertTreeToCode(pNodes, pCodes, 0, 0, rootNode);
+	if (debugFlag > 0)
+	{
+		printf("RootNode 0x%03X\n", rootNode);
+		printModel(pNodes, pCodes);
+	}
+
+	pOutput[inputSize] = 0;
+#if 0
+	uncompressData(pInput, inputSize, pOutput, pCodes);
+#endif
+
+	free(pNodes);
+	free(pCodes);
+	return 0;
+}
