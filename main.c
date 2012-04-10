@@ -111,10 +111,11 @@ int main(int argc, char** argv)
 		BitFile* pInput = NULL;
 		char* pOutput = NULL;
 
-		pOutput = (char*)malloc(16*1024*124);
+		const size_t maxOutputSize = 16*1024*1024;
+		pOutput = (char*)malloc(maxOutputSize);
 		pInput = binaryOpenInputFile(inputFileName);
 		inputSize = getFileSize(inputFileName);
-		outputSize = uncompressInput(pInput, inputSize, pOutput, debugFlag);
+		outputSize = uncompressInput(pInput, pOutput, maxOutputSize, debugFlag);
 
 		binaryCloseFile(pInput);
 		
