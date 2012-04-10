@@ -20,24 +20,6 @@ static BitFile* binaryOpenFile(const char* const name, const char* const mode)
 }
 
 /* Public API functions */
-void binaryFilePrint(FILE* pFile, unsigned int code, unsigned int bits)
-{
-	unsigned int mask = 0x0;
-	mask = (unsigned int)(1<<(bits-1));
-	while (mask != 0)
-	{
-		if (code & mask)
-		{
-			fputc('1', pFile);
-		}
-		else
-		{
-			fputc('0', pFile);
-		}
-		mask = mask>>1;
-	}
-}
-
 BitFile* binaryOpenInputFile(const char* const name)
 {
 	BitFile* const pBitFile = binaryOpenFile(name, "rb");
@@ -66,13 +48,31 @@ void binaryCloseFile(BitFile* const pBitFile)
 	free(pBitFile);
 }
 
-void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int count)
+void binaryFilePrint(FILE* pFile, unsigned int value, unsigned int numBits)
 {
-	unsigned long mask;
-	mask = (unsigned long)(1L<<(count-1));
+	unsigned int mask = 0x0;
+	mask = (unsigned int)(1<<(numBits-1));
 	while (mask != 0)
 	{
-		if (mask & code)
+		if (value & mask)
+		{
+			fputc('1', pFile);
+		}
+		else
+		{
+			fputc('0', pFile);
+		}
+		mask = mask>>1;
+	}
+}
+
+void binaryOutputBits(BitFile* const pOutput, unsigned long value, unsigned int numBits)
+{
+	unsigned long mask;
+	mask = (unsigned long)(1L<<(numBits-1));
+	while (mask != 0)
+	{
+		if (mask & value)
 		{
 			pOutput->currentBits |= pOutput->currentMask;
 		}
@@ -87,9 +87,31 @@ void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int c
 	}
 }
 
-#if 0
-void binaryInputBits(BitFile* const pOutput, unsigned long code, unsigned int count)
+unsigned long binaryInputBits(BitFile* const pOutput, unsigned int numBits)
 {
+	unsigned long value = 0;
+	unsigned long mask;
+
+	mask = (unsigned long)(1L<<(numBits-1));
+	while (mask != 0)
+	{
+		if (pOutput->currentMask == 0x80)
+		{
+			pOutput->currentBits = getc(pOutput->pFile);
+		}
+		if (pOutput->currentMask & pOutput->currentBits)
+		{
+			value |= mask;
+		}
+		mask = mask >> 1;
+
+		pOutput->currentMask = pOutput->currentMask >> 1;
+		if (pOutput->currentMask == 0)
+		{
+			pOutput->currentMask = 0x80;
+		}
+	}
+
+	return value;
 }
-#endif
 

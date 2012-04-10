@@ -15,9 +15,10 @@ BitFile* binaryOpenInputFile(const char* const name);
 BitFile* binaryOpenOutputFile(const char* const name);
 void binaryCloseFile(BitFile* const pBitFile);
 
-void binaryOutputBits(BitFile* const pOutput, unsigned long code, unsigned int count);
+void binaryFilePrint(FILE* pFile, unsigned int value, unsigned int numBits);
 
-void binaryFilePrint(FILE* pFile, unsigned int code, unsigned int bits);
+void binaryOutputBits(BitFile* const pOutput, unsigned long value, unsigned int numBits);
+unsigned long binaryInputBits(BitFile* const pOutput, unsigned int numBits);
 
 #endif /* #ifndef BINARY_UTIL_HH */
 
