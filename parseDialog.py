@@ -134,27 +134,34 @@ if __name__ == '__main__':
 	action = 'parse'
 
 	if action == 'parse':
-		inputFileName = "dialog_ai_recording_list"
-		inputFileName = "dialog_mp_recording_list"
-		inputFileName = "dialog_recording_list"
-		inputFileName = "text_game_controls"
-		inputFileName = "text_mp_messages"
-		inputFileName = "text_platformspecific"
-		inputFileName = "text_ui_credit_list"
-		inputFileName = "text_ui_database"
-		inputFileName = "text_ui_messages"
-		inputFileName = "text_ui_mp_messages"
-		inputFileName = "text_ui_objectives"
+		masterDialogFile = []
+		inputFileNames = []
+		totalInputFileSize = 0
 
-		inputFileName = "text_mp_messages"
+#		inputFileNames += ["dialog_ai_recording_list.xml"]
+#		inputFileNames += ["dialog_mp_recording_list.xml"]
+#		inputFileNames += ["dialog_recording_list.xml"]
+		inputFileNames += ["text_game_controls.xml"]
+		inputFileNames += ["text_mp_messages.xml"]
+#		inputFileNames += ["text_platformspecific.xml"]
+#		inputFileNames += ["text_ui_credit_list.xml"]
+#		inputFileNames += ["text_ui_database.xml"]
+#		inputFileNames += ["text_ui_messages.xml"]
+#		inputFileNames += ["text_ui_mp_messages.xml"]
+		inputFileNames += ["text_ui_objectives.xml"]
 
-		inputFileName += ".xml"
-		dialogFile = loadDialogFile(inputFileName)
-		debugPrintDialogFile(dialogFile)
+		for inputFileName in inputFileNames:
+			dialogFile = loadDialogFile(inputFileName)
+#			debugPrintDialogFile(dialogFile)
+			inputFileSize = os.path.getsize(inputFileName)
+			print "Input File:", inputFileName, inputFileSize, "bytes", len(dialogFile), "lines"
+			totalInputFileSize = inputFileSize;
+			masterDialogFile += dialogFile
 
+#		debugPrintDialogFile(masterDialogFile)
 		outputFileName = "jake.dia"
-		saveDialogFile(dialogFile, outputFileName, True, True)
+		saveDialogFile(masterDialogFile, outputFileName, True, True)
 
-		print "Input File:", inputFileName, os.path.getsize(inputFileName), "bytes"
+		print "Input Files:", totalInputFileSize, "bytes", len(masterDialogFile), "lines"
 		print "Output File:", outputFileName, os.path.getsize(outputFileName), "bytes"
 
