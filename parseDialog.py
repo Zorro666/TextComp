@@ -8,8 +8,8 @@ def debugPrintDialogFile(dialogFile):
 	tagSize = 0
 	valueSize = 0
 	for item in dialogFile:
-		tag = unicode(item['tag'])
-		value = unicode(item['value'])
+		tag = item['tag']
+		value = item['value']
 		print str("Tag:'")+tag+str("' Value:'")+value+str("'")
 		tagSize += len(tag)
 		valueSize += len(value)
@@ -94,11 +94,19 @@ def parseXML(xmlSource):
 							continue
 
 						if numRow == 0:
-							item['tag'] = c.text
-							foundIt += 1
+							if c.text != None:
+								item['tag'] = c.text.encode('utf_16', errors='strict')
+								foundIt += 1
 						if numRow == 2:
-							item['value'] = c.text
-							foundIt += 1
+							value = ""
+ 							if '{urn:schemas-microsoft-com:office:excel}Ticked' in c.attrib:
+								value = "'"
+							if c.text != None:
+								value += c.text
+							if value != None:
+								item['value'] = value.encode('utf_16', errors='strict')
+								foundIt += 1
+
 						numRow += 1
 
 				if foundIt == 2:
@@ -109,8 +117,8 @@ def parseXML(xmlSource):
 def saveDialogFile(dialogFile, filename, writeTags=True, writeValues=True):
 	f = open(filename, "wb")
 	for item in dialogFile:
-		tag = unicode(item['tag'])
-		value = unicode(item['value'])
+		tag = item['tag']
+		value = item['value']
 		if writeTags == True:
 			f.write(tag)
 			f.write('\0')
@@ -147,7 +155,7 @@ if __name__ == '__main__':
 #		inputFileNames += ["text_ui_credit_list.xml"]
 #		inputFileNames += ["text_ui_database.xml"]
 #		inputFileNames += ["text_ui_messages.xml"]
-#		inputFileNames += ["text_ui_mp_messages.xml"]
+		inputFileNames += ["text_ui_mp_messages.xml"]
 		inputFileNames += ["text_ui_objectives.xml"]
 
 		for inputFileName in inputFileNames:

@@ -3,14 +3,14 @@
 
 #include "huffman.h"
 
-static int outputFile(const char* const fileName, const char* const pData, const size_t numBytes)
+static int outputFile(const char* const fileName, const byte* const pData, const size_t numBytes)
 {
 	FILE* const pFile = fopen(fileName, "wb");
 	if (pFile == NULL)
 	{
 		return 0;
 	}
-	fwrite(pData, sizeof(char), numBytes, pFile);
+	fwrite(pData, sizeof(byte), numBytes, pFile);
 	fclose(pFile);
 	return 1;
 }
@@ -30,18 +30,18 @@ static size_t getFileSize(const char* const fileName)
 	return fileSize;
 }
 
-char* loadDiaFile(const char* const inputFileName, size_t* const pInputSize)
+byte* loadDiaFile(const char* const inputFileName, size_t* const pInputSize)
 {
 	const size_t fileSize = getFileSize(inputFileName);
-	char* const inputBuffer = (char* const)malloc(fileSize);
+	byte* const inputBuffer = (byte* const)malloc(fileSize);
 	size_t inputSize = 0;
 	size_t i;
 	FILE* const pFile = fopen(inputFileName, "rb");
 
 	for (i = 0; i < fileSize; i++)
 	{
-		char data;
-		if (fread(&data, sizeof(char), 1, pFile) != 1)
+		byte data;
+		if (fread(&data, sizeof(byte), 1, pFile) != 1)
 		{
 			inputSize = 0;
 			break;
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 		size_t inputSize = 0;
 		size_t outputSize = 0;
 		float ratio = 0.0f;
-		char* pInput = NULL;
+		byte* pInput = NULL;
 		BitFile* pOutput = NULL;
 
 		pInput = loadDiaFile(inputFileName, &inputSize);
@@ -109,10 +109,10 @@ int main(int argc, char** argv)
 		size_t outputSize = 0;
 		float ratio = 0.0f;
 		BitFile* pInput = NULL;
-		char* pOutput = NULL;
+		byte* pOutput = NULL;
 
 		const size_t maxOutputSize = 16*1024*1024;
-		pOutput = (char*)malloc(maxOutputSize);
+		pOutput = (byte*)malloc(maxOutputSize);
 		pInput = binaryOpenInputFile(inputFileName);
 		inputSize = getFileSize(inputFileName);
 		outputSize = uncompressInput(pInput, pOutput, maxOutputSize, debugFlag);

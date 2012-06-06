@@ -1,6 +1,7 @@
 #include <string.h>
 #include <malloc.h>
 
+#include "huffman.h"
 #include "binaryUtil.h"
 
 typedef struct TreeNode
@@ -26,12 +27,12 @@ typedef struct SymbolCode
 
 /* Internal private static functions */
 
-static void makeCounts(const char* const pSource, const size_t numBytes, unsigned long* const pCounts)
+static void makeCounts(const byte* const pSource, const size_t numBytes, unsigned long* const pCounts)
 {
 	size_t i;
 	for (i = 0; i < numBytes; i++)
 	{
-		const int symbol = pSource[i];
+		const byte symbol = pSource[i];
 		pCounts[symbol]++;
 	}
 }
@@ -261,7 +262,7 @@ static void printModel(const TreeNode* const pNodes, const SymbolCode* const pCo
 	}
 }
 
-static void compressData(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const SymbolCode* const pCodes)
+static void compressData(const byte* const pInput, const size_t numBytes, BitFile* const pOutput, const SymbolCode* const pCodes)
 {
 	size_t i;
 	for (i = 0; i < numBytes; i++)
@@ -274,7 +275,7 @@ static void compressData(const char* const pInput, const size_t numBytes, BitFil
 	binaryOutputBits(pOutput, pCodes[END_OF_STREAM].value, pCodes[END_OF_STREAM].numBits);
 }
 
-static size_t	uncompressData(BitFile* const pInput, char* const pOutput, const size_t maxOutputSize, 
+static size_t	uncompressData(BitFile* const pInput, byte* const pOutput, const size_t maxOutputSize, 
 														const int rootNode, const TreeNode* const pNodes, const size_t debugFlag)
 {
 	size_t numOutputBytes = 0;
@@ -315,7 +316,7 @@ static size_t	uncompressData(BitFile* const pInput, char* const pOutput, const s
 			}
 		}
 #endif
-		pOutput[numOutputBytes] = (char)code;
+		pOutput[numOutputBytes] = (byte)code;
 		numOutputBytes++;
 		if (numOutputBytes >= maxOutputSize)
 		{
@@ -327,7 +328,7 @@ static size_t	uncompressData(BitFile* const pInput, char* const pOutput, const s
 }
 
 /* Public API functions */
-void compressInput(const char* const pInput, const size_t numBytes, BitFile* const pOutput, const unsigned int debugFlag)
+void compressInput(const byte* const pInput, const size_t numBytes, BitFile* const pOutput, const unsigned int debugFlag)
 {
 	unsigned long* pCounts = NULL;
 	TreeNode* pNodes = NULL;
@@ -359,7 +360,7 @@ void compressInput(const char* const pInput, const size_t numBytes, BitFile* con
 	free(pCodes);
 }
 
-size_t uncompressInput(BitFile* const pInput, char* const pOutput, const size_t maxOutputSize, const unsigned int debugFlag)
+size_t uncompressInput(BitFile* const pInput, byte* const pOutput, const size_t maxOutputSize, const unsigned int debugFlag)
 {
 	TreeNode* pNodes = NULL;
 	SymbolCode* pCodes = NULL;
